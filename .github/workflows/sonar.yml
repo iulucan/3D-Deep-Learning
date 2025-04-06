@@ -8,14 +8,14 @@ on:
 
 jobs:
   sonarQube:
-    name: SonarQube Analysis
+    name: Run SonarQube Analysis
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
-          fetch-depth: 0
+          fetch-depth: 0  # commit geçmişi gerekir
 
       - name: Set up Python
         uses: actions/setup-python@v4
@@ -24,7 +24,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install -r requirements.txt || true
+          python -m pip install --upgrade pip
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
       - name: Run SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@master
@@ -32,6 +33,5 @@ jobs:
           projectBaseDir: .
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          # SONAR_HOST_URL: http://localhost:9000
-          SONAR_HOST_URL: https://sonarcloud.io
+          SONAR_HOST_URL: http://localhost:9000  # veya https://sonarcloud.io
 
