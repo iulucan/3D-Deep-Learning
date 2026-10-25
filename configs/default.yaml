@@ -1,0 +1,18 @@
+# Solar Panel 3D Anomaly Detection — default training config
+
+data_root: data/solar_panels
+num_points: 1024
+batch_size: 32
+epochs: 100
+lr: 0.001
+weight_decay: 0.0001
+dropout: 0.3
+checkpoint_dir: checkpoints
+
+augmentation:
+  rotation_z: true
+  jitter_sigma: 0.01
+  dropout_ratio: 0.5
+  scale_range: [0.9, 1.1]
+
+log_interval: 10
