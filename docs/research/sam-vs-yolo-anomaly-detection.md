@@ -93,3 +93,136 @@ The examples are **pretrained general-purpose weights**. They do not recognize s
 | Previously unseen fault types | Limited | Limited | Can segment a prompted region but not identify a fault | May find visually describable concepts; no anomaly guarantee |
 | Speed/resource profile | Often attractive for deployment | Additional mask computation | Depends on checkpoint, prompts and hardware | Depends on prompts, scale and hardware |
 | Best initial use | Detect known faults | Detect + outline known faults | Segment individual panels/refine masks | Explore concept-driven panel segmentation |
+
+## 6. Suggested experimental pipelines
+
+### Pipeline A — Supervised YOLO baseline
+
+```text
+RGB / thermal inspection images
+             |
+             v
+      Quality control
+             |
+             v
+  Annotated defect dataset
+             |
+             v
+  YOLO11 / YOLO26 training
+             |
+             v
+ Defect class + bounding box
+             |
+             v
+     Evaluation / review
+```
+
+Start here if there is a sufficiently labeled defect dataset.
+
+### Pipeline B — YOLO segmentation baseline
+
+```text
+RGB / thermal images
+          |
+          v
+  Defect mask annotations
+          |
+          v
+ YOLO11-seg / YOLO26-seg
+          |
+          v
+ Defect class + pixel mask
+```
+
+Use this to check whether SAM refinement is really needed.
+
+### Pipeline C — YOLO + SAM 2.1 hybrid
+
+```text
+RGB / thermal images
+          |
+          v
+ YOLO defect/panel detection
+          |
+          v
+   Candidate bounding boxes
+          |
+          v
+  SAM 2.1 mask refinement
+          |
+          v
+  Refined region boundaries
+          |
+          v
+ Temperature / defect analysis
+          |
+          v
+  Expert validation + report
+```
+
+Bounding boxes can be passed to SAM as prompts. Measure whether the hybrid improves masks enough to justify inference cost and integration complexity. **Segmenting a hotspot-looking region does not validate that it is an electrical fault.**
+
+### Pipeline D — Novel anomaly discovery (separate baseline)
+
+```text
+Mostly healthy panel images
+            |
+            v
+ Panel extraction (SAM/YOLO)
+            |
+            v
+ PatchCore / EfficientAD, etc.
+            |
+            v
+    Anomaly score / map
+            |
+            v
+   Expert review + labeling
+```
+
+This explores anomalies not exhaustively represented by defect classes. It should be evaluated separately from supervised YOLO training.
+
+## 7. Dataset and evaluation design
+
+### Data requirements
+
+- RGB images and/or thermal images, with sensor type and acquisition conditions recorded.
+- Clear distinction between **false-color thermal screenshots** and **radiometric temperature measurements**.
+- Labels for panel locations, known defect classes, and (if available) pixel-level defect masks.
+- Diverse panel types, lighting, weather, camera angles, altitudes, and healthy controls.
+- Ground-truth review by domain experts; electrical measurements where appropriate.
+- Train/validation/test splits **by site, inspection flight, or module group**, not random adjacent frames, to avoid leakage.
+
+### Suggested defect taxonomy (adapt to available ground truth)
+
+- Thermal hotspots / abnormal heating patterns
+- Visible cracks or physical damage
+- Soiling, shading, vegetation, and occlusion (potential confounders)
+- Cell/string-level abnormal patterns where labels and image resolution support them
+- Unknown or uncertain anomaly (review required)
+
+### Metrics
+
+| Evaluation target | Measures |
+|---|---|
+| Known-defect detection | Precision, recall, F1, mAP@50, mAP@50:95 |
+| Defect segmentation | Mask IoU, Dice, mask mAP |
+| Novel-anomaly ranking | AUROC, AUPRC, false-positive rate at fixed recall |
+| Operational usefulness | Missed critical faults, false alarms per inspected panel, annotation time |
+| Deployment | Latency, throughput, GPU/CPU memory, energy usage |
+| Robustness | Per-site, per-camera, per-weather and per-defect breakdown |
+
+**Priority:** Recall for consequential faults, while controlling false positives that lead to unnecessary manual inspections.
+
+### Benchmark matrix
+
+| Experiment | Model | Task | Status |
+|---|---|---|---|
+| E1 | YOLO11n | Defect detection | Not started |
+| E2 | YOLO26n | Defect detection | Not started |
+| E3 | YOLO11n-seg | Defect instance segmentation | Not started |
+| E4 | YOLO26n-seg | Defect instance segmentation | Not started |
+| E5 | SAM 2.1 tiny / base+ | Panel segmentation; annotation support | Not started |
+| E6 | YOLO + SAM 2.1 | Detection + mask refinement | Not started |
+| E7 | SAM 3 / 3.1 | Concept-guided panel segmentation | Not started |
+| E8 | PatchCore or EfficientAD | Novel anomaly baseline | Not started |
