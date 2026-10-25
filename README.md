@@ -1,4 +1,4 @@
-# 3D Deep Learning — Solar Panel Anomaly Detection
+# 3D Deep Learning : Use case - Solar Panel Anomaly Detection
 
 A deep learning pipeline for detecting surface anomalies in solar panels using **3D point cloud data**. The project uses a PointNet-based architecture to process LiDAR / photogrammetry scans and classify panels as normal or anomalous, supporting both reconstruction-based and classification-based detection strategies.
 
