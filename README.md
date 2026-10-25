@@ -67,6 +67,22 @@ Each `.ply` file should contain XYZ coordinates of a single panel scan. The load
 | PointNet + Classifier | 0.92 | 0.87 | 8 |
 | PointNet + Autoencoder | 0.89 | 0.83 | 12 |
 
+## Object Detection
+
+This project's point cloud pipeline is intentionally independent of 2D object
+detection, but these are the two most relevant general-purpose methods if a
+2D pre-filtering or localization step is ever added (e.g. detecting panel
+boundaries in a drone photo before the 3D scan is processed):
+
+| Method | Use case | Official repo |
+|--------|----------|----------------|
+| **YOLO** (You Only Look Once) | Real-time bounding-box detection — fast, single-pass | [ultralytics/ultralytics](https://github.com/ultralytics/ultralytics) |
+| **SAM** (Segment Anything Model) | Promptable, pixel-level segmentation — no fixed class list | [facebookresearch/segment-anything](https://github.com/facebookresearch/segment-anything) |
+
+Both ship pretrained weights, so either can be prototyped without training
+a detector from scratch — useful before committing to a 3D-specific
+detection head.
+
 ## Key References
 
 - Qi et al., [PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation](https://arxiv.org/abs/1612.00593), CVPR 2017
