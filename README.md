@@ -83,6 +83,10 @@ Both ship pretrained weights, so either can be prototyped without training
 a detector from scratch — useful before committing to a 3D-specific
 detection.
 
+## Research Notes
+
+- [SAM vs. YOLO for solar panel anomaly detection](docs/research/sam-vs-yolo-anomaly-detection.md) — evaluation plan for using these as a 2D pre-filtering step ahead of the 3D pipeline.
+
 ## Key References
 
 - Qi et al., [PointNet: Deep Learning on Point Sets for 3D Classification and Segmentation](https://arxiv.org/abs/1612.00593), CVPR 2017
