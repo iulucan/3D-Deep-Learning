@@ -226,3 +226,68 @@ This explores anomalies not exhaustively represented by defect classes. It shoul
 | E6 | YOLO + SAM 2.1 | Detection + mask refinement | Not started |
 | E7 | SAM 3 / 3.1 | Concept-guided panel segmentation | Not started |
 | E8 | PatchCore or EfficientAD | Novel anomaly baseline | Not started |
+
+## 8. Minimal training example (YOLO)
+
+> **Illustrative commands only.** They require a prepared dataset and a compatible environment; they have not been executed for this project.
+
+```bash
+pip install ultralytics
+
+# Check package and runtime information
+python -c 'import ultralytics; print(ultralytics.__version__)'
+
+# Train a detection baseline using your own dataset definition
+yolo detect train model=yolo11n.pt data=solar_defects.yaml epochs=100 imgsz=640
+
+# Validate using the configured split
+yolo detect val model=runs/detect/train/weights/best.pt data=solar_defects.yaml
+```
+
+Example `solar_defects.yaml` (paths and class list must be adapted):
+
+```yaml
+path: /path/to/solar-dataset
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: hotspot
+  1: visible_damage
+  2: soiling
+```
+
+For segmentation, use mask annotations and a `*-seg.pt` checkpoint, then the `yolo segment` task rather than `yolo detect`.
+
+## 9. Recommended starting strategy
+
+1. **Establish the data and ground truth**: clarify whether the target is visible damage, thermal patterns, or confirmed electrical faults.
+2. **Start with YOLO11n and YOLO26n** as supervised detection baselines.
+3. **Compare YOLO-seg** if pixel-level boundaries are required.
+4. **Test SAM 2.1** for panel masks, annotation assistance, or refinement of YOLO boxes.
+5. **Explore SAM 3/3.1** for open-vocabulary/concept-guided panel identification, without assuming zero-shot fault diagnosis.
+6. **Include a dedicated anomaly detector** if rare or unknown faults are part of the goal.
+7. **Report accuracy and cost together** on held-out sites/flights before selecting a deployment pipeline.
+
+### Open research questions
+
+- Does a YOLO + SAM pipeline improve defect localization compared with YOLO-seg alone?
+- How much annotated solar-specific data is needed to fine-tune YOLO effectively?
+- Can SAM 3's text prompting reliably identify panels under different drone-camera viewpoints?
+- Does radiometric thermal information improve performance beyond RGB or false-color thermal imagery?
+- Which model yields the fewest missed critical faults at an acceptable false-alarm rate?
+- Can inference run on the actual inspection hardware within operational limits?
+
+## 10. References and official repositories
+
+1. [Meta: Segment Anything (SAM 1)](https://github.com/facebookresearch/segment-anything)
+2. [Meta: SAM 2 / SAM 2.1](https://github.com/facebookresearch/sam2)
+3. [Meta: SAM 3](https://github.com/facebookresearch/sam3)
+4. [Meta: SAM 3.1 announcement](https://ai.meta.com/blog/segment-anything-model-3/)
+5. [Ultralytics: YOLO model documentation](https://docs.ultralytics.com/models/)
+6. [Ultralytics: source repository](https://github.com/ultralytics/ultralytics)
+7. [Ultralytics: model family history](https://www.ultralytics.com/yolo)
+
+---
+
+*This page describes proposed methods, not validated results for a particular PV dataset. Confirm model licensing, checkpoint access, hardware requirements, and sensor/inspection constraints before production use.*
