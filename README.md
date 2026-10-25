@@ -81,7 +81,7 @@ boundaries in a drone photo before the 3D scan is processed):
 
 Both ship pretrained weights, so either can be prototyped without training
 a detector from scratch — useful before committing to a 3D-specific
-detection head.
+detection.
 
 ## Key References
 
